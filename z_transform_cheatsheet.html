@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z-Transform Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222536;
+    --border: #2e3148;
+    --accent: #7c6ff7;
+    --accent2: #f7a26f;
+    --accent3: #6ff7c4;
+    --accent4: #f76f6f;
+    --text: #e8e9f0;
+    --muted: #8b8fa8;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 52px;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    margin: 20px auto 0;
+    border-radius: 2px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 38px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .card.purple::before { background: linear-gradient(90deg, var(--accent), #a78bfa); }
+  .card.orange::before { background: linear-gradient(90deg, var(--accent2), #fcd34d); }
+  .card.green::before { background: linear-gradient(90deg, var(--accent3), #6ee7b7); }
+  .card.red::before { background: linear-gradient(90deg, var(--accent4), #fb923c); }
+  .card.blue::before { background: linear-gradient(90deg, #6fa8f7, #a78bfa); }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card.purple .card-title { color: var(--accent); }
+  .card.orange .card-title { color: var(--accent2); }
+  .card.green .card-title { color: var(--accent3); }
+  .card.red .card-title { color: var(--accent4); }
+  .card.blue .card-title { color: #6fa8f7; }
+
+  .card-title::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  .formula-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .formula-block:last-child { margin-bottom: 0; }
+
+  .formula-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+    font-family: var(--sans);
+  }
+
+  .formula {
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .formula .highlight { color: var(--accent); }
+  .formula .highlight2 { color: var(--accent2); }
+  .formula .highlight3 { color: var(--accent3); }
+  .formula .highlight4 { color: var(--accent4); }
+
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: var(--sans);
+    line-height: 1.5;
+  }
+
+  .note strong { color: var(--accent2); font-weight: 500; }
+
+  .warn {
+    background: rgba(247, 111, 111, 0.08);
+    border: 1px solid rgba(247, 111, 111, 0.25);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--accent4);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  .warn::before { content: '⚠ '; }
+
+  .tip {
+    background: rgba(124, 111, 247, 0.08);
+    border: 1px solid rgba(124, 111, 247, 0.25);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #a78bfa;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  .tip::before { content: '💡 '; }
+
+  .steps {
+    counter-reset: step;
+    list-style: none;
+  }
+
+  .steps li {
+    counter-increment: step;
+    padding: 10px 0 10px 36px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .steps li:last-child { border-bottom: none; padding-bottom: 0; }
+  .steps li:first-child { padding-top: 0; }
+
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+  }
+
+  .steps li:first-child::before { top: 0; }
+
+  .steps li code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent3);
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .span-2 { grid-column: span 2; }
+
+  .example-box {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .example-box:last-child { margin-bottom: 0; }
+
+  .example-title {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    font-family: var(--mono);
+  }
+
+  .example-line {
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 3px 0;
+    color: var(--text);
+  }
+
+  .example-line .arrow { color: var(--accent); margin: 0 6px; }
+  .example-line .result { color: var(--accent3); }
+  .example-line .comment { color: var(--muted); font-size: 11px; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .badge.common { background: rgba(124,111,247,0.15); color: var(--accent); }
+  .badge.watch { background: rgba(247,162,111,0.15); color: var(--accent2); }
+
+  @media (max-width: 720px) {
+    .span-2 { grid-column: span 1; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="tag">Special Mathematics · UTCN</div>
+  <h1>Z<span>-Transform</span> Cheatsheet</h1>
+  <div class="subtitle">Everything from the session — methods, rules, traps, and worked patterns</div>
+</div>
+
+<div class="grid">
+
+  <!-- PROPERTIES -->
+  <div class="card purple">
+    <div class="card-title">Core Properties</div>
+
+    <div class="formula-block">
+      <div class="formula-label">Linearity</div>
+      <div class="formula">Z[af(n) + bg(n)] = <span class="highlight">a·F(z) + b·G(z)</span></div>
+      <div class="note">Always split sums first, then transform each piece separately.</div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Scaling (most used property)</div>
+      <div class="formula">Z[aⁿ · f(n)] = <span class="highlight">F(z/a)</span></div>
+      <div class="note">Replace every <strong>z</strong> with <strong>z/a</strong> in F(z). Then simplify — don't leave z/a in numerator.</div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Shift — first order</div>
+      <div class="formula">Z[f(n+1)] = <span class="highlight">z·F(z) − z·f(0)</span></div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Shift — second order</div>
+      <div class="formula">Z[f(n+2)] = <span class="highlight">z²·F(z) − z²·f(0) − z·f(1)</span></div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Multiplication by n</div>
+      <div class="formula">Z[n·f(n)] = <span class="highlight">−z · dF/dz</span></div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Summation property</div>
+      <div class="formula">Z[Σf(k)] = <span class="highlight">z/(z−1) · F(z)</span></div>
+    </div>
+
+    <div class="tip">On your formula sheet — you don't need to memorise these, just know how to apply them.</div>
+  </div>
+
+  <!-- SCALING TRICK -->
+  <div class="card orange">
+    <div class="card-title">Scaling — Step by Step</div>
+
+    <div class="example-box">
+      <div class="example-title">Example: Z[2ⁿ · n]</div>
+      <div class="example-line">Start with Z[n] = z/(z−1)²</div>
+      <div class="example-line">Replace z → z/2:</div>
+      <div class="example-line" style="padding-left:12px; color: var(--muted);">(z/2) / (z/2 − 1)²</div>
+      <div class="example-line">Fix denominator: z/2 − 1 = (z−2)/2</div>
+      <div class="example-line">Square it: (z−2)²/4</div>
+      <div class="example-line">Divide: (z/2) ÷ ((z−2)²/4)</div>
+      <div class="example-line">= (z/2) · (4/(z−2)²) <span class="arrow">=</span> <span class="result">2z/(z−2)²</span></div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Memorise this pattern instead</div>
+      <div class="formula">Z[aⁿ · n] = <span class="highlight2">az / (z−a)²</span></div>
+      <div class="note">a=2 → 2z/(z−2)² &nbsp;|&nbsp; a=3 → 3z/(z−3)²</div>
+    </div>
+
+    <div class="warn">Never leave z/a sitting in the numerator. Always simplify to the clean form.</div>
+
+    <div class="formula-block" style="margin-top:12px">
+      <div class="formula-label">Going backwards (inverse)</div>
+      <div class="formula">See <span class="highlight2">z/(z−2)²</span> ?</div>
+      <div class="note">That's (1/2) · 2z/(z−2)², so f(n) = <strong>(1/2) · n · 2ⁿ</strong></div>
+      <div class="note" style="margin-top:4px"><strong>Rule:</strong> squared denominator = n in the answer, always.</div>
+    </div>
+  </div>
+
+  <!-- INVERSE — PARTIAL FRACTIONS -->
+  <div class="card green">
+    <div class="card-title">Inverse Z-Transform — Partial Fractions</div>
+
+    <ol class="steps">
+      <li>Divide both sides by z: compute <code>F(z)/z</code></li>
+      <li>Do partial fractions on F(z)/z</li>
+      <li>Multiply everything back by z to get F(z) in terms of <code>z/(z−a)</code></li>
+      <li>Read f(n) from table: <code>z/(z−a) → aⁿ</code></li>
+    </ol>
+
+    <div class="example-box" style="margin-top:14px">
+      <div class="example-title">Example: F(z) = z / (z−1)(z−3)</div>
+      <div class="example-line">F(z)/z = 1/(z−1)(z−3)</div>
+      <div class="example-line">= A/(z−1) + B/(z−3)</div>
+      <div class="example-line">A: set z=1 → 1/(1−3) = <span class="result">−1/2</span></div>
+      <div class="example-line">B: set z=3 → 1/(3−1) = <span class="result">+1/2</span></div>
+      <div class="example-line">F(z) = −(1/2)·z/(z−1) + (1/2)·z/(z−3)</div>
+      <div class="example-line">f(n) = <span class="result">−1/2 + (1/2)·3ⁿ</span></div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Repeated root setup — different!</div>
+      <div class="formula">1/(z−a)² <span class="highlight3">→</span> A/(z−a) + B/(z−a)²</div>
+      <div class="note">Two terms required. Find B first (plug z=a), then find A with any other z value.</div>
+    </div>
+
+    <div class="warn">Signs — copying A and B into the final answer is where marks get dropped. Double check every sign.</div>
+  </div>
+
+  <!-- INVERSE — RESIDUES -->
+  <div class="card blue">
+    <div class="card-title">Inverse Z-Transform — Residue Method</div>
+
+    <div class="formula-block">
+      <div class="formula-label">Formula</div>
+      <div class="formula">f(n) = <span class="highlight">Σ Res[ zⁿ⁻¹ · F(z) ]</span> at all poles</div>
+      <div class="note">The 2πi from the integral formula is already accounted for — do NOT write it in your answer.</div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Simple pole at z = a</div>
+      <div class="formula">Res = lim<sub>z→a</sub> (z−a) · zⁿ⁻¹ · F(z)</div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">Example: F(z) = (z²−3z)/(z−1)(z−2)</div>
+      <div class="example-line">Res at z=1: lim (z−1)·zⁿ⁻¹·F(z)|<sub>z=1</sub></div>
+      <div class="example-line" style="padding-left:12px">= 1ⁿ⁻¹ · (1−3)/(1−2) = (−2)/(−1) = <span class="result">2</span></div>
+      <div class="example-line">Res at z=2: lim (z−2)·zⁿ⁻¹·F(z)|<sub>z=2</sub></div>
+      <div class="example-line" style="padding-left:12px">= 2ⁿ⁻¹ · (4−6)/1 = 2ⁿ⁻¹·(−2) = <span class="result">−2ⁿ</span></div>
+      <div class="example-line">f(n) = <span class="result">2 − 2ⁿ</span></div>
+    </div>
+
+    <div class="tip">Use residues when partial fractions get ugly. For clean denominators, partial fractions is faster.</div>
+  </div>
+
+  <!-- DIFFERENCE EQUATIONS -->
+  <div class="card red span-2">
+    <div class="card-title">Solving Difference Equations — Full Method</div>
+
+    <div class="grid" style="gap:16px; margin-top:0;">
+
+      <div>
+        <div class="formula-block">
+          <div class="formula-label">Method — always 3 steps</div>
+          <ol class="steps">
+            <li>Apply Z-transform to both sides. Use shifting for f(n+1), f(n+2). Z[f(n)] = F(z).</li>
+            <li>Substitute initial conditions, collect F(z), isolate it algebraically.</li>
+            <li>Inverse Z-transform via partial fractions or residues → f(n).</li>
+          </ol>
+        </div>
+
+        <div class="formula-block" style="margin-top:12px">
+          <div class="formula-label">Homogeneous — right side = 0</div>
+          <div class="formula">f(n+1) − 2f(n) = 0, f(0)=3</div>
+          <div class="note" style="margin-top:6px">Transform → F(z)(z−2) = 3z</div>
+          <div class="note">F(z) = 3z/(z−2) → <strong>f(n) = 3·2ⁿ</strong></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="formula-block">
+          <div class="formula-label">Non-homogeneous — right side ≠ 0</div>
+          <div class="formula">f(n+1) − 2f(n) = 3ⁿ, f(0)=0</div>
+          <div class="note" style="margin-top:6px">Z[3ⁿ] = z/(z−3) goes to the right side</div>
+          <div class="note">F(z) = z/((z−3)(z−2)) → <strong>f(n) = 3ⁿ − 2ⁿ</strong></div>
+        </div>
+
+        <div class="formula-block" style="margin-top:12px">
+          <div class="formula-label">Second order — hardest type</div>
+          <div class="formula">f(n+2) − 5f(n+1) + 6f(n) = 2ⁿ</div>
+          <div class="formula">f(0)=0, f(1)=1</div>
+          <div class="note" style="margin-top:6px">Z[f(n+2)] = z²F(z) − z²f(0) − z·f(1)</div>
+          <div class="note">Gives F(z) = z²/((z−2)²(z−3))</div>
+          <div class="note">Partial fractions: A/(z−2) + B/(z−2)² + C/(z−3)</div>
+          <div class="note">C=1, B=0 → solve for A → f(n) = <strong>A·2ⁿ + 3ⁿ</strong></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="warn" style="margin-top:16px">Always write parentheses: F(z) = 3z/(z−2), never 3z/z−2. Ambiguous notation loses marks even if the algebra is right.</div>
+  </div>
+
+  <!-- COMMON MISTAKES -->
+  <div class="card orange">
+    <div class="card-title">Mistakes Made This Session</div>
+
+    <div class="example-box">
+      <div class="example-title">❌ Dropping the coefficient in scaling</div>
+      <div class="example-line">Z[3ⁿ·n] ≠ z/(z−3)²</div>
+      <div class="example-line">Z[3ⁿ·n] = <span class="result">3z/(z−3)²</span></div>
+      <div class="note" style="margin-top:6px">The a out front always survives. Check: az/(z−a)².</div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">❌ Confusing scaling with direct table lookup</div>
+      <div class="example-line">Z[3ⁿ] is direct from table → z/(z−3)</div>
+      <div class="example-line">Z[3ⁿ·n] needs scaling property</div>
+      <div class="note" style="margin-top:6px">Only use scaling when aⁿ is multiplied by another f(n).</div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">❌ Leaving 2πi in residue answer</div>
+      <div class="example-line">f(n) = 2πi·(Res1) + 2πi·(Res2) ← wrong</div>
+      <div class="example-line">f(n) = Res1 + Res2 ← <span class="result">correct</span></div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">❌ Sign errors in partial fractions</div>
+      <div class="note">After finding A and B, copy the exact sign into the final f(n). Most marks lost here.</div>
+    </div>
+  </div>
+
+  <!-- QUICK PATTERNS -->
+  <div class="card purple">
+    <div class="card-title">Quick Pattern Recognition</div>
+
+    <div class="formula-block">
+      <div class="formula-label">What you see → what it means</div>
+      <div class="example-line" style="font-family: var(--mono); font-size:13px; padding: 4px 0;">z/(z−a) <span class="arrow">→</span> <span class="result">aⁿ</span></div>
+      <div class="example-line" style="font-family: var(--mono); font-size:13px; padding: 4px 0;">az/(z−a)² <span class="arrow">→</span> <span class="result">n·aⁿ</span></div>
+      <div class="example-line" style="font-family: var(--mono); font-size:13px; padding: 4px 0;">z/(z−a)² <span class="arrow">→</span> <span class="result">(1/a)·n·aⁿ</span></div>
+      <div class="example-line" style="font-family: var(--mono); font-size:13px; padding: 4px 0;">squared denom <span class="arrow">→</span> <span class="result">n always appears</span></div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-label">Factoring denominators — don't mess this up</div>
+      <div class="formula">z²−3z+2 = <span class="highlight">(z−1)(z−2)</span></div>
+      <div class="formula">z²+3z+2 = <span class="highlight">(z+1)(z+2)</span></div>
+      <div class="formula">z²−5z+6 = <span class="highlight">(z−2)(z−3)</span></div>
+      <div class="note">Always factor before partial fractions. Wrong factoring = everything wrong after.</div>
+    </div>
+
+    <div class="tip">When you see a rational F(z) with distinct roots → partial fractions. With a repeated root → repeated root setup. With complex algebra → residues.</div>
+  </div>
+
+</div>
+
+</body>
+</html>
