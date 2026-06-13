@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complex Analysis — Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --border: #1e2330;
+    --accent: #7c6af7;
+    --accent2: #f7a26a;
+    --accent3: #6af7c4;
+    --accent4: #f76a8a;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --tag-bg: #1e2330;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2rem 1rem 4rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .card.purple::before { background: var(--accent); }
+  .card.orange::before { background: var(--accent2); }
+  .card.green::before  { background: var(--accent3); }
+  .card.red::before    { background: var(--accent4); }
+
+  .card h2 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .card.purple h2 { color: var(--accent); }
+  .card.orange h2 { color: var(--accent2); }
+  .card.green h2  { color: var(--accent3); }
+  .card.red h2    { color: var(--accent4); }
+
+  .card.wide {
+    grid-column: 1 / -1;
+  }
+
+  .formula-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.7rem;
+    position: relative;
+  }
+
+  .formula-block:last-child { margin-bottom: 0; }
+
+  .formula-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 0.3rem;
+  }
+
+  .formula-math {
+    font-size: 0.95rem;
+  }
+
+  .formula-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    font-style: italic;
+  }
+
+  .tag {
+    display: inline-block;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .warn {
+    background: rgba(247, 162, 106, 0.08);
+    border: 1px solid rgba(247, 162, 106, 0.25);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.78rem;
+    color: var(--accent2);
+    margin-bottom: 0.7rem;
+  }
+
+  .warn strong { font-weight: 700; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+
+  th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.hl { color: var(--accent3); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+
+  .decision {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .decision-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .decision-icon {
+    font-size: 1rem;
+    min-width: 1.4rem;
+    text-align: center;
+    margin-top: 0.1rem;
+  }
+
+  .decision-text {
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .decision-text strong {
+    color: var(--text);
+    display: block;
+    margin-bottom: 0.1rem;
+  }
+
+  .decision-text span {
+    color: var(--muted);
+  }
+
+  .step-list {
+    counter-reset: steps;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .step-list li {
+    counter-increment: steps;
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    font-size: 0.8rem;
+  }
+
+  .step-list li::before {
+    content: counter(steps);
+    background: var(--accent);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.1rem;
+  }
+
+  .mjx-container { overflow-x: auto; }
+
+  @media (max-width: 600px) {
+    .two-col { grid-template-columns: 1fr; }
+    .card.wide { grid-column: auto; }
+    header h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Complex Analysis</h1>
+  <p>Special Math (S) · Exam Cheatsheet · UTCN 2026</p>
+</header>
+
+<div class="grid">
+
+  <!-- COMPLEX LOG & ELEMENTARY FUNCTIONS -->
+  <div class="card purple">
+    <h2>Complex Logarithm</h2>
+    <div class="formula-block">
+      <div class="formula-label">Definition (multivalued)</div>
+      <div class="formula-math">\(\text{Log}(z) = \ln|z| + i(\arg z + 2k\pi), \quad k \in \mathbb{Z}\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Principal value (k=0)</div>
+      <div class="formula-math">\(\log z = \ln|z| + i \cdot \text{Arg}(z), \quad \text{Arg}(z) \in (-\pi, \pi]\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Power function</div>
+      <div class="formula-math">\(z^a = e^{a \cdot \text{Log}(z)}\)</div>
+    </div>
+    <div class="warn"><strong>Key arguments:</strong> Arg(positive real) = 0 · Arg(negative real) = π · Arg(+i·r) = π/2 · Arg(−i·r) = −π/2</div>
+  </div>
+
+  <!-- ELEMENTARY FUNCTIONS -->
+  <div class="card green">
+    <h2>Elementary Functions</h2>
+    <div class="formula-block">
+      <div class="formula-label">Exponential</div>
+      <div class="formula-math">\(e^z = e^x(\cos y + i \sin y), \quad z = x+iy\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Trig (exponential form)</div>
+      <div class="formula-math">\(\sin z = \dfrac{e^{iz}-e^{-iz}}{2i} \qquad \cos z = \dfrac{e^{iz}+e^{-iz}}{2}\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Hyperbolic</div>
+      <div class="formula-math">\(\sinh z = \dfrac{e^{z}-e^{-z}}{2} \qquad \cosh z = \dfrac{e^{z}+e^{-z}}{2}\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Euler's formula</div>
+      <div class="formula-math">\(e^{i\theta} = \cos\theta + i\sin\theta\)</div>
+    </div>
+  </div>
+
+  <!-- SOLVING COMPLEX TRIG EQUATIONS -->
+  <div class="card orange">
+    <h2>Solving Complex Trig Equations</h2>
+    <div class="tag">sin(z) = a → substitute w = e^iz</div>
+    <ol class="step-list">
+      <li>Write exponential form: \(\dfrac{w - 1/w}{2i} = a\)</li>
+      <li>Multiply by \(2iw\): \(w^2 - 2iaw - 1 = 0\)</li>
+      <li>Solve quadratic: \(w = ia \pm \sqrt{1 - a^2}\) (check discriminant carefully)</li>
+      <li>Take complex log: \(iz = \text{Log}(w)\), then divide by \(i\)</li>
+      <li>Dividing by \(i\): multiply by \(-i\) (since \(1/i = -i\))</li>
+    </ol>
+    <div class="formula-block" style="margin-top:0.7rem">
+      <div class="formula-label">cos(z) = a → same but</div>
+      <div class="formula-math">\(\dfrac{w + 1/w}{2} = a \Rightarrow w^2 - 2aw + 1 = 0\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">sinh(z) = a → substitute w = e^z</div>
+      <div class="formula-math">\(w^2 - 2aw - 1 = 0\), then \(z = \text{Log}(w)\)</div>
+    </div>
+  </div>
+
+  <!-- SINGULARITIES -->
+  <div class="card red">
+    <h2>Singularity Classification</h2>
+    <div class="warn"><strong>Always expand the numerator first</strong> — a zero in the numerator reduces the pole order!</div>
+    <table>
+      <tr><th>Type</th><th>Principal Part</th><th>How to spot</th></tr>
+      <tr>
+        <td>Removable</td>
+        <td class="hl">0 terms</td>
+        <td>Limit exists and is finite</td>
+      </tr>
+      <tr>
+        <td>Pole order k</td>
+        <td class="hl">k terms</td>
+        <td>Finite negative powers, ends at \((z-z_0)^{-k}\)</td>
+      </tr>
+      <tr>
+        <td>Essential</td>
+        <td class="hl">∞ terms</td>
+        <td>\(e^{1/z}\), \(\sin(1/z)\) type</td>
+      </tr>
+    </table>
+    <div class="formula-block" style="margin-top:0.7rem">
+      <div class="formula-label">Check order by Laurent expansion</div>
+      <div class="formula-math">\(\frac{\sin z}{z^4} \Rightarrow \frac{z - z^3/6 + \cdots}{z^4} = z^{-3} - \frac{1}{6}z^{-1} + \cdots\)</div>
+      <div class="formula-note">Lowest power is z⁻³ → pole of order 3, NOT 4</div>
+    </div>
+  </div>
+
+  <!-- RESIDUES -->
+  <div class="card purple">
+    <h2>Residue Calculation</h2>
+    <div class="formula-block">
+      <div class="formula-label">Simple pole (order 1)</div>
+      <div class="formula-math">\(\text{Res}[f, z_0] = \lim_{z \to z_0}(z-z_0)f(z)\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Pole of order n</div>
+      <div class="formula-math">\(\text{Res}[f, z_0] = \dfrac{1}{(n-1)!}\lim_{z \to z_0}\dfrac{d^{n-1}}{dz^{n-1}}\left[(z-z_0)^n f(z)\right]\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Ratio rule — f(z) = g(z)/h(z), z₀ simple zero of h</div>
+      <div class="formula-math">\(\text{Res}[f, z_0] = \dfrac{g(z_0)}{h'(z_0)}\)</div>
+      <div class="formula-note">Only works when: pole is order 1 AND g(z₀) ≠ 0</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Essential singularity</div>
+      <div class="formula-math">Must expand Laurent series — residue = coefficient of \((z-z_0)^{-1}\)</div>
+    </div>
+  </div>
+
+  <!-- RESIDUE THEOREM -->
+  <div class="card green">
+    <h2>Residue Theorem</h2>
+    <div class="formula-block">
+      <div class="formula-label">General formula</div>
+      <div class="formula-math">\(\oint_C f(z)\,dz = 2\pi i \sum_{k} \text{Res}[f, z_k]\)</div>
+      <div class="formula-note">Sum over ALL singularities inside C only</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Single singularity</div>
+      <div class="formula-math">\(\oint_C f(z)\,dz = 2\pi i \cdot \text{Res}[f, z_0]\)</div>
+    </div>
+    <div class="warn"><strong>Step 1:</strong> Find singularities &nbsp;|&nbsp; <strong>Step 2:</strong> Check if inside contour &nbsp;|&nbsp; <strong>Step 3:</strong> Calculate residues &nbsp;|&nbsp; <strong>Step 4:</strong> Sum × 2πi</div>
+  </div>
+
+  <!-- CAUCHY'S INTEGRAL FORMULA -->
+  <div class="card orange">
+    <h2>Cauchy's Integral Formula</h2>
+    <div class="formula-block">
+      <div class="formula-label">General (n-th derivative)</div>
+      <div class="formula-math">\(\oint_C \dfrac{f(z)}{(z-z_0)^n}\,dz = \dfrac{2\pi i}{(n-1)!}\,f^{(n-1)}(z_0)\)</div>
+    </div>
+    <div class="two-col">
+      <div class="formula-block">
+        <div class="formula-label">n = 1</div>
+        <div class="formula-math">\(2\pi i \cdot f(z_0)\)</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-label">n = 2</div>
+        <div class="formula-math">\(2\pi i \cdot f'(z_0)\)</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-label">n = 3</div>
+        <div class="formula-math">\(\pi i \cdot f''(z_0)\)</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-label">n = 4</div>
+        <div class="formula-math">\(\dfrac{\pi i}{3} \cdot f'''(z_0)\)</div>
+      </div>
+    </div>
+    <div class="warn"><strong>Use Cauchy when:</strong> numerator f(z) is analytic, singularity comes only from (z−z₀)ⁿ in denominator</div>
+  </div>
+
+  <!-- DECISION TREE -->
+  <div class="card red">
+    <h2>Which Method to Use?</h2>
+    <div class="decision">
+      <div class="decision-item">
+        <div class="decision-icon">①</div>
+        <div class="decision-text">
+          <strong>Cauchy's formula</strong>
+          <span>Numerator is analytic (eᶻ, sin z, cos z, polynomial). Denominator is (z−z₀)ⁿ only. → differentiate f, plug in z₀</span>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-icon">②</div>
+        <div class="decision-text">
+          <strong>Residue theorem</strong>
+          <span>f(z) itself has singularities (poles from denominator factors). → find all poles inside C, compute residues, sum × 2πi</span>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-icon">③</div>
+        <div class="decision-text">
+          <strong>Cauchy theorem (=0)</strong>
+          <span>f(z) is holomorphic everywhere inside C (no singularities at all). → integral = 0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAUCHY-RIEMANN -->
+  <div class="card green">
+    <h2>Cauchy–Riemann Conditions</h2>
+    <div class="formula-block">
+      <div class="formula-label">f(z) = u(x,y) + iv(x,y) is holomorphic iff</div>
+      <div class="formula-math">\(\dfrac{\partial u}{\partial x} = \dfrac{\partial v}{\partial y} \qquad \dfrac{\partial u}{\partial y} = -\dfrac{\partial v}{\partial x}\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">Derivative</div>
+      <div class="formula-math">\(f'(z) = \dfrac{\partial u}{\partial x} + i\dfrac{\partial v}{\partial x}\)</div>
+    </div>
+  </div>
+
+  <!-- LAURENT SERIES TECHNIQUE -->
+  <div class="card purple">
+    <h2>Laurent Series — Key Technique</h2>
+    <div class="formula-block">
+      <div class="formula-label">Geometric series trick</div>
+      <div class="formula-math">\(\dfrac{1}{1-w} = \sum_{n=0}^{\infty} w^n, \quad |w| < 1\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">If |z| &lt; |a|: factor out a</div>
+      <div class="formula-math">\(\dfrac{1}{z-a} = \dfrac{-1}{a}\cdot\dfrac{1}{1-z/a} = \dfrac{-1}{a}\sum_{n=0}^{\infty}\left(\dfrac{z}{a}\right)^n\)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-label">If |z| &gt; |a|: factor out z</div>
+      <div class="formula-math">\(\dfrac{1}{z-a} = \dfrac{1}{z}\cdot\dfrac{1}{1-a/z} = \dfrac{1}{z}\sum_{n=0}^{\infty}\left(\dfrac{a}{z}\right)^n\)</div>
+    </div>
+    <div class="formula-note" style="padding: 0 0.2rem; margin-top: 0.4rem;">Always check: is the ratio less than 1? That's the convergence condition.</div>
+  </div>
+
+  <!-- COMMON TAYLOR SERIES -->
+  <div class="card orange">
+    <h2>Taylor Series to Memorize</h2>
+    <table>
+      <tr><th>Function</th><th>Expansion</th></tr>
+      <tr>
+        <td>\(e^z\)</td>
+        <td>\(1 + z + \dfrac{z^2}{2!} + \dfrac{z^3}{3!} + \cdots\)</td>
+      </tr>
+      <tr>
+        <td>\(\sin z\)</td>
+        <td>\(z - \dfrac{z^3}{3!} + \dfrac{z^5}{5!} - \cdots\)</td>
+      </tr>
+      <tr>
+        <td>\(\cos z\)</td>
+        <td>\(1 - \dfrac{z^2}{2!} + \dfrac{z^4}{4!} - \cdots\)</td>
+      </tr>
+      <tr>
+        <td>\(\sinh z\)</td>
+        <td>\(z + \dfrac{z^3}{3!} + \dfrac{z^5}{5!} + \cdots\)</td>
+      </tr>
+      <tr>
+        <td>\(\cosh z\)</td>
+        <td>\(1 + \dfrac{z^2}{2!} + \dfrac{z^4}{4!} + \cdots\)</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- COMMON MISTAKES -->
+  <div class="card red wide">
+    <h2>Your Recurring Mistakes — Fix These</h2>
+    <div class="two-col">
+      <div>
+        <div class="formula-block">
+          <div class="formula-label">❌ Pole order from denominator only</div>
+          <div class="formula-math">Always expand numerator first. If numerator has zero at same point → order reduces.</div>
+          <div class="formula-note">e.g. sin(z)/z⁴ → pole order 3, not 4</div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-label">❌ Sign errors in residues</div>
+          <div class="formula-math">cos(z) → \(-\sin z\) → \(-\cos z\) → \(\sin z\). Always track the minus sign.</div>
+          <div class="formula-note">cos(z)/z³ residue is −1/2, not +1/2</div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-label">❌ Forgetting 1/(n-1)! in order-n formula</div>
+          <div class="formula-math">For n=3: divide by 2! = 2. For n=4: divide by 3! = 6.</div>
+        </div>
+      </div>
+      <div>
+        <div class="formula-block">
+          <div class="formula-label">❌ 1/i not simplified</div>
+          <div class="formula-math">\(\dfrac{1}{i} = -i \qquad \dfrac{1}{2i} = \dfrac{-i}{2} \qquad \dfrac{-1}{i} = i\)</div>
+          <div class="formula-note">Multiply numerator and denominator by i, remember i² = −1</div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-label">❌ e^{iz} vs e^z in trig substitution</div>
+          <div class="formula-math">sin/cos → w = e^{iz} &nbsp;|&nbsp; sinh/cosh → w = e^z</div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-label">❌ Arg confusion</div>
+          <div class="formula-math">sin(1) ≠ 0. &nbsp; sin(π) = 0. &nbsp; sin(1 radian) ≈ 0.841</div>
+          <div class="formula-note">Don't confuse radian values with multiples of π</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

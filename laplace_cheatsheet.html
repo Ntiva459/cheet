@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laplace Transform — Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #13131a;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #7c6af7;
+    --accent2: #4fc4a0;
+    --accent3: #f7a26a;
+    --accent4: #f76a8a;
+    --text: #e8e6f0;
+    --muted: #7a7890;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 36px;
+  }
+
+  .header-left .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .header-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* GRID LAYOUT */
+  .grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .card.accent-left {
+    border-left: 3px solid var(--accent);
+  }
+  .card.accent-left-2 {
+    border-left: 3px solid var(--accent2);
+  }
+  .card.accent-left-3 {
+    border-left: 3px solid var(--accent3);
+  }
+  .card.accent-left-4 {
+    border-left: 3px solid var(--accent4);
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .card.accent-left-2 .card-title { color: var(--accent2); }
+  .card.accent-left-3 .card-title { color: var(--accent3); }
+  .card.accent-left-4 .card-title { color: var(--accent4); }
+
+  /* FORMULA ROWS */
+  .formula-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .formula-row:last-child { border-bottom: none; }
+
+  .f-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+
+  .f-time {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .f-arrow {
+    color: var(--border);
+    font-size: 12px;
+    flex-shrink: 0;
+    padding: 0 8px;
+  }
+
+  .f-image {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    flex: 1;
+    text-align: right;
+  }
+
+  .card.accent-left-2 .f-image { color: var(--accent2); }
+  .card.accent-left-3 .f-image { color: var(--accent3); }
+  .card.accent-left-4 .f-image { color: var(--accent4); }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* WORKFLOW STEPS */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .card.accent-left-2 .step-num { background: var(--accent2); }
+  .card.accent-left-3 .step-num { background: var(--accent3); }
+
+  .step-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .step-text code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .card.accent-left-2 .step-text code { color: var(--accent2); }
+  .card.accent-left-3 .step-text code { color: var(--accent3); }
+
+  /* WARN BOX */
+  .warn {
+    background: #1e1610;
+    border: 1px solid #4a3010;
+    border-left: 3px solid var(--accent3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #c8a870;
+    margin-top: 12px;
+  }
+
+  .warn strong {
+    color: var(--accent3);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* SPAN FULL */
+  .span-full { grid-column: 1 / -1; }
+
+  /* PARTIAL FRACTIONS TABLE */
+  .pf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .pf-table th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pf-table td {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .pf-table tr:last-child td { border-bottom: none; }
+
+  .pf-table td:first-child { color: var(--muted); padding-right: 20px; }
+  .pf-table td:nth-child(2) { color: var(--text); padding-right: 20px; }
+  .pf-table td:last-child { color: var(--accent4); }
+
+  /* EXAMPLE BLOCK */
+  .example {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.9;
+  }
+
+  .example .ex-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .ex-line { color: var(--text); }
+  .ex-line .hi { color: var(--accent2); }
+  .ex-line .hi2 { color: var(--accent); }
+  .ex-line .hi3 { color: var(--accent3); }
+
+  /* FOOTER */
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="eyebrow">Special Mathematics · UTCN</div>
+    <h1>Laplace <span>Transform</span></h1>
+  </div>
+  <div class="header-right">
+    Chapter 2<br>
+    f(t) → F(p)<br>
+    June 2026
+  </div>
+</header>
+
+<!-- ROW 1: Core Properties -->
+<div class="section-label">Core Properties</div>
+<div class="grid grid-2">
+
+  <div class="card accent-left">
+    <div class="card-title">Properties — Formula Sheet Supplement</div>
+    <div class="formula-row">
+      <span class="f-label">linearity</span>
+      <span class="f-time">a·f + b·g</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">a·F(p) + b·G(p)</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">1st shift</span>
+      <span class="f-time">e^(at)·f(t)</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">F(p − a)</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">t-mult</span>
+      <span class="f-time">t · f(t)</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">− F'(p)</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">deriv f'</span>
+      <span class="f-time">f'(t)</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">p·F(p) − f(0)</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">deriv f''</span>
+      <span class="f-time">f''(t)</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">p²·F(p) − p·f(0) − f'(0)</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">integral</span>
+      <span class="f-time">∫₀ᵗ f(u) du</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">F(p) / p</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">convolution</span>
+      <span class="f-time">(f * g)(t)</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">F(p) · G(p)</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ROW 2: Forward + Inverse Workflows -->
+<div class="section-label">Workflows</div>
+<div class="grid grid-3">
+
+  <div class="card accent-left">
+    <div class="card-title">Forward Transform — Inside Out</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Identify the innermost function (sin, cos, t^n)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Apply <code>L[t·f(t)] = −F'(p)</code> if there's a t factor</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Apply shift <code>F(p−a)</code> last for the e^(at) factor</div>
+      </div>
+    </div>
+    <div class="example">
+      <div class="ex-label">Example: t · cos(2t) · e^(−t)</div>
+      <div class="ex-line">① <span class="hi2">L[cos(2t)] = p/(p²+4)</span></div>
+      <div class="ex-line">② <span class="hi">−d/dp[p/(p²+4)] = (p²−4)/(p²+4)²</span></div>
+      <div class="ex-line">③ replace p → <span class="hi3">(p+1)</span></div>
+      <div class="ex-line">= <span class="hi">((p+1)²−4) / ((p+1)²+4)²</span></div>
+    </div>
+  </div>
+
+  <div class="card accent-left-2">
+    <div class="card-title">Inverse Transform — Partial Fractions</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Factor the denominator completely</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Decompose: linear → <code>A/(p−a)</code>, irreducible quadratic → <code>(Bp+C)/(p²+w²)</code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Find constants by substituting roots (plug p = root for each linear factor)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">For quadratic: match coefficients of p², p¹, p⁰</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Invert each term using the table</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card accent-left-3">
+    <div class="card-title">ODE Solving — Cauchy Method</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Apply L to every term in the ODE</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Substitute initial conditions x(0), x'(0) immediately</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Solve algebraically for <code>X(p)</code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Partial fractions on X(p)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Invert to get x(t)</div>
+      </div>
+    </div>
+    <div class="warn">
+      <strong>⚠ Never forget</strong>
+      Initial conditions are substituted at Step 2, not at the end. Missing them costs the whole problem.
+    </div>
+  </div>
+
+</div>
+
+<!-- Variable Coefficient ODE -->
+<div class="section-label">Variable Coefficient ODEs</div>
+<div class="grid grid-2">
+
+  <div class="card accent-left-4">
+    <div class="card-title">When ODE has t · x'', t · x' terms</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Transform normally first: <code>L[x''] = p²X(p) − p·x(0) − x'(0)</code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Then apply t-multiplication: <code>L[t·x''] = −d/dp[p²X(p) − p·x(0) − x'(0)]</code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">This produces a <strong style="color:var(--accent4)">first-order ODE in p</strong> with X'(p) — solve it as a separable ODE</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Use <code>lim(p→∞) X(p) = 0</code> as the boundary condition to find the constant C</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Invert X(p) using the table</div>
+      </div>
+    </div>
+    <div class="warn">
+      <strong>⚠ Key difference</strong>
+      You end up with X'(p) in the equation — it's no longer pure algebra. Separate variables: dX/X = (...)dp, integrate both sides, then exponentiate.
+    </div>
+  </div>
+
+  <div class="card accent-left-4">
+    <div class="card-title">t-Multiplication Rules — Applied to ODE Terms</div>
+    <div class="formula-row">
+      <span class="f-label">t·x(t)</span>
+      <span class="f-time" style="font-family:var(--mono); font-size:12px">L[t·x]</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">−X'(p)</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">t·x'(t)</span>
+      <span class="f-time" style="font-family:var(--mono); font-size:12px">L[t·x']</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">−d/dp[pX(p) − x(0)]</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-label">t·x''(t)</span>
+      <span class="f-time" style="font-family:var(--mono); font-size:12px">L[t·x'']</span>
+      <span class="f-arrow">→</span>
+      <span class="f-image">−d/dp[p²X − px(0) − x'(0)]</span>
+    </div>
+    <div class="example">
+      <div class="ex-label">After differentiating and substituting ICs</div>
+      <div class="ex-line"><span class="hi2">L[t·x'']</span> = −(2p·X(p) + p²·X'(p)) + x(0)</div>
+      <div class="ex-line"><span class="hi2">L[t·x']</span> = −(X(p) + p·X'(p)) + 0</div>
+      <div class="ex-line" style="margin-top:6px; color: var(--muted)">→ collect X'(p) terms → separable ODE</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ROW 3: Partial Fractions Reference + Completing Square -->
+<div class="section-label">Partial Fractions — Case Reference</div>
+<div class="grid grid-2">
+
+  <div class="card accent-left-4">
+    <div class="card-title">Decomposition Forms</div>
+    <table class="pf-table">
+      <tr>
+        <th>Factor in denom</th>
+        <th>Form to use</th>
+        <th>Find constants by</th>
+      </tr>
+      <tr>
+        <td>(p − a)</td>
+        <td>A / (p − a)</td>
+        <td>plug p = a</td>
+      </tr>
+      <tr>
+        <td>(p − a)²</td>
+        <td>A/(p−a) + B/(p−a)²</td>
+        <td>plug p = a, match coefficients</td>
+      </tr>
+      <tr>
+        <td>(p² + w²)</td>
+        <td>(Bp + C) / (p² + w²)</td>
+        <td>match p², p¹, p⁰ coefficients</td>
+      </tr>
+      <tr>
+        <td>(p−a)(p²+w²)</td>
+        <td>A/(p−a) + (Bp+C)/(p²+w²)</td>
+        <td>plug p=a for A, then match</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card accent-left-2">
+    <div class="card-title">Completing the Square — Inverse Trick</div>
+    <div style="font-size:13px; margin-bottom:12px; color: var(--muted);">When denominator won't factor → complete the square, then match to shifted sin/cos.</div>
+    <div class="formula-row">
+      <span class="f-time" style="color:var(--muted)">Pattern</span>
+      <span class="f-image" style="color:var(--text); text-align:left; padding-left:16px">(p−a)² + w²</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-time" style="color:var(--muted)">→ sine</span>
+      <span class="f-image" style="text-align:left; padding-left:16px">w/[(p−a)²+w²] → e^(at)·sin(wt)</span>
+    </div>
+    <div class="formula-row">
+      <span class="f-time" style="color:var(--muted)">→ cosine</span>
+      <span class="f-image" style="text-align:left; padding-left:16px">(p−a)/[(p−a)²+w²] → e^(at)·cos(wt)</span>
+    </div>
+    <div class="example">
+      <div class="ex-label">Example: 3/(p²−4p+13)</div>
+      <div class="ex-line">p²−4p+13 = <span class="hi">(p−2)²+ 9</span></div>
+      <div class="ex-line">w = <span class="hi3">3</span>, a = <span class="hi2">2</span></div>
+      <div class="ex-line">→ <span class="hi">e^(2t) · sin(3t)</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ROW 4: Convolution + Improper Integrals -->
+<div class="section-label">Applications</div>
+<div class="grid grid-2">
+
+  <div class="card accent-left-3">
+    <div class="card-title">Integral Equations — Convolution Method</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Recognize <code>∫₀ᵗ x(u)·g(t−u) du</code> as convolution x * g</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Transform: <code>L[x*g] = X(p)·G(p)</code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Solve algebraically for X(p), then partial fractions, then invert</div>
+      </div>
+    </div>
+    <div class="example">
+      <div class="ex-label">x(t) + ∫₀ᵗ x(u)·sin(t−u) du = t</div>
+      <div class="ex-line">X(p) + X(p)·<span class="hi3">1/(p²+1)</span> = <span class="hi2">1/p²</span></div>
+      <div class="ex-line">X(p)·(p²+2)/(p²+1) = 1/p²</div>
+      <div class="ex-line">X(p) = (p²+1) / [p²·(p²+2)]</div>
+      <div class="ex-line">→ x(t) = <span class="hi">½ + ½·cos(√2·t)</span></div>
+    </div>
+  </div>
+
+  <div class="card accent-left">
+    <div class="card-title">Improper Integrals — f(t)/t Theorem</div>
+    <div style="font-family: var(--mono); font-size: 13px; color: var(--accent); background: var(--surface2); padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; line-height: 1.8;">
+      ∫₀^∞ f(t)/t dt = ∫₀^∞ F(p) dp
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Identify f(t) — the numerator only, ignore the /t</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Find <code>F(p) = L[f(t)]</code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Integrate F(p) from 0 to ∞ and evaluate limits</div>
+      </div>
+    </div>
+    <div class="example">
+      <div class="ex-label">Classic: ∫₀^∞ sin(t)/t dt</div>
+      <div class="ex-line">F(p) = <span class="hi2">1/(p²+1)</span></div>
+      <div class="ex-line">∫₀^∞ 1/(p²+1) dp = <span class="hi">arctan(p)</span>|₀^∞</div>
+      <div class="ex-line">= π/2 − 0 = <span class="hi3">π/2</span></div>
+    </div>
+    <div class="example">
+      <div class="ex-label">Shifted: ∫₀^∞ e^(−t)·sin(t)/t dt</div>
+      <div class="ex-line">f(t) = <span class="hi2">e^(−t)·sin(t)</span></div>
+      <div class="ex-line">F(p) = <span class="hi2">1/((p+1)²+1)</span> — shift by a=1</div>
+      <div class="ex-line">∫₀^∞ F(p) dp = arctan(p+1)|₀^∞</div>
+      <div class="ex-line">= π/2 − arctan(1) = π/2 − π/4 = <span class="hi3">π/4</span></div>
+    </div>
+    <div class="warn">
+      <strong>⚠ Common mistake</strong>
+      arctan(∞) = π/2, NOT 1. With shift, lower limit is arctan(a), not 0.
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>Laplace Transform · Special Math · UTCN Automation</span>
+  <span>f(t) ⟶ F(p) = ∫₀^∞ f(t)·e^(−pt) dt</span>
+</footer>
+
+</body>
+</html>
