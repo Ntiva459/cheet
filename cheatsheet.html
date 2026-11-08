@@ -1,0 +1,455 @@
+<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>C Data Structures Cheatsheet</title><style>:root{--a:#7c5cff;--b:#00e0c6}*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}[hidden]{display:none!important}
+body{margin:0;font:16px/1.6 system-ui,sans-serif;background:radial-gradient(circle at 15% -10%,#2a1b6b66,transparent 50%),#0b0d17;color:#e6e9f5}
+header{text-align:center;padding:28px 14px 8px}h1{margin:0;font-size:clamp(1.7rem,7vw,3rem);background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{color:#8b93b5;margin:4px 0 12px}#f{width:100%;max-width:520px;padding:10px 16px;border-radius:99px;border:1px solid #7c5cff77;background:#141828;color:#e6e9f5;font-size:16px}
+nav{position:sticky;top:0;z-index:9;display:flex;gap:8px;overflow-x:auto;padding:10px;background:#0b0d17ee;backdrop-filter:blur(8px)}nav a,nav button{flex:none;color:#e6e9f5;text-decoration:none;padding:6px 14px;border-radius:99px;border:1px solid #7c5cff88;background:none;font-size:.9rem;cursor:pointer}
+main{max-width:920px;margin:auto;padding:8px 12px 60px}section{scroll-margin-top:56px}h2{border-left:6px solid var(--b);padding-left:10px;margin:28px 0 8px}
+.note{background:#ffb86c18;border-left:4px solid #ffb86c;border-radius:8px;padding:8px 12px;font-size:.92rem;margin-bottom:8px}
+.card{background:#141828;border:1px solid #7c5cff33;border-radius:14px;padding:4px 14px;margin:10px 0}summary{cursor:pointer;font-weight:700;color:var(--b);padding:8px 0}.card p{margin:0 0 6px;color:#aab1d4;font-size:.93rem}
+pre{position:relative;margin:6px 0 12px;padding:12px;border-radius:10px;background:#0a0c16;overflow-x:auto;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;border:1px solid #ffffff14;tab-size:4}
+pre button{position:absolute;top:6px;right:6px;border:0;border-radius:8px;padding:3px 10px;background:var(--a);color:#fff;opacity:.7}
+i{font-style:normal}i.k{color:#ff79c6}i.t{color:#8be9fd}i.c{color:#6272a4}i.n{color:#ffb86c}i.b{color:#50fa7b}</style></head><body><header><h1>⚡ C Data Structures</h1><p>Linked lists · Stack · Queue · Hash tables · Sorting</p><input id=f placeholder="search: delete, tail, tombstone, merge..." oninput=flt()></header><nav><a href=#sll>Singly LL</a><a href=#dll>Doubly LL</a><a href=#stack>Stack</a><a href=#queue>Queue</a><a href=#astack>Array stack</a><a href=#aqueue>Array queue</a><a href=#chain>Hash: chaining</a><a href=#probe>Hash: probing</a><a href=#sort>Sorting</a><button onclick=tg()>fold all</button></nav><main><section id=sll><h2>Singly LL</h2><div class=note>Every insert/delete at an end must update head/tail. deleteend is O(n): you need the node BEFORE tail. Never copy head/tail into locals and change the copies. Free what you remove.</div><details class=card><summary>Given types</summary><pre><code>typedef struct Node{int data;struct Node*next;}Node;
+typedef struct{Node*head,*tail;}List;
+</code></pre></details><details class=card open><summary>insertbegin</summary><p>Insert val as the NEW FIRST node. Careful: if the list was empty, tail must be set too.</p><pre><code>void insertbegin(List *list,int val) {
+    Node*n=malloc(sizeof(Node));
+    n-&gt;data=val;
+    n-&gt;next=list-&gt;head;
+    list-&gt;head=n;
+    if(!list-&gt;tail)list-&gt;tail=n;
+}</code></pre></details><details class=card open><summary>insertEnd</summary><p>Insert val as the LAST node in O(1) using tail. Empty list: head AND tail.</p><pre><code>void insertEnd(List *list,int val) {
+    Node*n=malloc(sizeof(Node));
+    n-&gt;data=val;
+    n-&gt;next=NULL;
+    if(list-&gt;tail)list-&gt;tail-&gt;next=n;
+    else list-&gt;head=n;
+    list-&gt;tail=n;
+}</code></pre></details><details class=card open><summary>insertmidd (after value)</summary><p>Insert val AFTER the first node holding data. If data is not found, append at the end. Update tail if needed.</p><pre><code>void insertmidd(List *list,int data,int val) {
+    Node*n=malloc(sizeof(Node));
+    n-&gt;data=val;
+    Node*p=list-&gt;head;
+    while(p&amp;&amp;p-&gt;data!=data)p=p-&gt;next;
+    if(!p){
+        n-&gt;next=NULL;
+        if(list-&gt;tail)list-&gt;tail-&gt;next=n;
+        else list-&gt;head=n;
+        list-&gt;tail=n;
+        return;
+    }
+    n-&gt;next=p-&gt;next;
+    p-&gt;next=n;
+    if(p==list-&gt;tail)list-&gt;tail=n;
+}</code></pre></details><details class=card open><summary>deletebegin</summary><p>Delete the FIRST node (free it!). If the list becomes empty, tail must become NULL.</p><pre><code>void deletebegin(List *list) {
+    if(!list-&gt;head)return;
+    Node*t=list-&gt;head;
+    list-&gt;head=t-&gt;next;
+    if(!list-&gt;head)list-&gt;tail=NULL;
+    free(t);
+}</code></pre></details><details class=card open><summary>deleteend</summary><p>Delete the LAST node. Needs the node BEFORE tail. Work on list-&gt;head / list-&gt;tail, not local copies! Single node case too.</p><pre><code>void deleteend(List *list) {
+    Node*h=list-&gt;head;
+    if(!h)return;
+    if(h==list-&gt;tail){
+        free(h);
+        list-&gt;head=list-&gt;tail=NULL;
+        return;
+    }
+    while(h-&gt;next!=list-&gt;tail)h=h-&gt;next;
+    free(list-&gt;tail);
+    list-&gt;tail=h;
+    h-&gt;next=NULL;
+}</code></pre></details><details class=card open><summary>deletespecific (by value)</summary><p>Delete the first node whose data == val (do nothing if absent). Cases: head, middle, tail.</p><pre><code>void deletespecific(List *list,int val) {
+    Node*c=list-&gt;head,*prev=NULL;
+    while(c&amp;&amp;c-&gt;data!=val){
+        prev=c;
+        c=c-&gt;next;
+    }
+    if(!c)return;
+    if(prev)prev-&gt;next=c-&gt;next;
+    else list-&gt;head=c-&gt;next;
+    if(c==list-&gt;tail)list-&gt;tail=prev;
+    free(c);
+}</code></pre></details><details class=card open><summary>search</summary><p>Return the first node with data == val, or NULL if absent.</p><pre><code>Node *search(List *list,int val) {
+    Node*c=list-&gt;head;
+    while(c&amp;&amp;c-&gt;data!=val)c=c-&gt;next;
+    return c;
+}</code></pre></details><details class=card open><summary>printList</summary><p>Print every node as &quot;v -&gt; &quot; and finish with NULL and a newline. Format exactly: 3 -&gt; 5 -&gt; NULL</p><pre><code>void printList(List *list) {
+    for(Node*c=list-&gt;head;c;c=c-&gt;next)printf(&quot;%d -&gt; &quot;,c-&gt;data);
+    printf(&quot;NULL&quot;);
+    puts(&quot;&quot;);
+}</code></pre></details><details class=card open><summary>freelist</summary><p>Free EVERY node (save next before freeing!), then set head and tail to NULL.</p><pre><code>void freelist(List *list) {
+    Node*c=list-&gt;head;
+    while(c){
+        Node*t=c;
+        c=c-&gt;next;
+        free(t);
+    }
+    list-&gt;head=list-&gt;tail=NULL;
+}</code></pre></details><details class=card open><summary>deleteafter (after value)</summary><p>Find the node holding data and delete the node AFTER it. Nothing to delete if data is absent or it is the last node. If the deleted node was the tail, tail = that node.</p><pre><code>void deleteafter(List *list,int data) {
+    Node*p=list-&gt;head;
+    while(p&amp;&amp;p-&gt;data!=data)p=p-&gt;next;
+    if(!p||!p-&gt;next)return;
+    Node*t=p-&gt;next;
+    p-&gt;next=t-&gt;next;
+    if(t==list-&gt;tail)list-&gt;tail=p;
+    free(t);
+}</code></pre></details></section><section id=dll><h2>Doubly LL</h2><div class=note>Fix prev AND next (4 links on insert-after). Check p-&gt;next / p-&gt;prev exist before touching them, otherwise update tail/head. With a tail pointer, delete-last is O(1).</div><details class=card><summary>Given types</summary><pre><code>typedef struct Node{int data;struct Node*next,*prev;}Node;
+typedef struct{Node*head,*tail;}List;
+</code></pre></details><details class=card open><summary>insertlast</summary><p>Insert at the END of the doubly linked list: set prev, next, and head/tail.</p><pre><code>void insertlast(List *list,int val) {
+    Node*n=malloc(sizeof(Node));
+    n-&gt;data=val;
+    n-&gt;next=NULL;
+    n-&gt;prev=list-&gt;tail;
+    if(list-&gt;tail)list-&gt;tail-&gt;next=n;
+    else list-&gt;head=n;
+    list-&gt;tail=n;
+}</code></pre></details><details class=card open><summary>insertsomewhere (after node p)</summary><p>Insert val AFTER node p. 4 links to fix; if p was the tail, update tail.</p><pre><code>void insertsomewhere(List *list,Node *p,int val) {
+    Node*n=malloc(sizeof(Node));
+    n-&gt;data=val;
+    n-&gt;prev=p;
+    n-&gt;next=p-&gt;next;
+    if(p-&gt;next)p-&gt;next-&gt;prev=n;
+    else list-&gt;tail=n;
+    p-&gt;next=n;
+}</code></pre></details><details class=card open><summary>deleteValue</summary><p>Delete first node with data == val. Fix prev-&gt;next AND next-&gt;prev (head/tail at the edges), then free.</p><pre><code>void deleteValue(List *list,int val) {
+    Node*p=list-&gt;head;
+    while(p&amp;&amp;p-&gt;data!=val)p=p-&gt;next;
+    if(!p)return;
+    if(p-&gt;prev)p-&gt;prev-&gt;next=p-&gt;next;
+    else list-&gt;head=p-&gt;next;
+    if(p-&gt;next)p-&gt;next-&gt;prev=p-&gt;prev;
+    else list-&gt;tail=p-&gt;prev;
+    free(p);
+}</code></pre></details><details class=card open><summary>insertfirst</summary><p>Insert at the START. Old head-&gt;prev must point to the new node; if the list was empty, tail too.</p><pre><code>void insertfirst(List *list,int val) {
+    Node*n=malloc(sizeof(Node));
+    n-&gt;data=val;
+    n-&gt;prev=NULL;
+    n-&gt;next=list-&gt;head;
+    if(list-&gt;head)list-&gt;head-&gt;prev=n;
+    else list-&gt;tail=n;
+    list-&gt;head=n;
+}</code></pre></details><details class=card open><summary>deletefirst</summary><p>Delete the first node. New head-&gt;prev = NULL; if the list becomes empty, tail = NULL.</p><pre><code>void deletefirst(List *list) {
+    if(!list-&gt;head)return;
+    Node*t=list-&gt;head;
+    list-&gt;head=t-&gt;next;
+    if(list-&gt;head)list-&gt;head-&gt;prev=NULL;
+    else list-&gt;tail=NULL;
+    free(t);
+}</code></pre></details><details class=card open><summary>deletelast</summary><p>O(1) thanks to tail and prev: tail = tail-&gt;prev. Then tail-&gt;next = NULL, or head = NULL if it was the only node.</p><pre><code>void deletelast(List *list) {
+    if(!list-&gt;tail)return;
+    Node*t=list-&gt;tail;
+    list-&gt;tail=t-&gt;prev;
+    if(list-&gt;tail)list-&gt;tail-&gt;next=NULL;
+    else list-&gt;head=NULL;
+    free(t);
+}</code></pre></details><details class=card open><summary>displayforward + displaybackward</summary><p>Forward: head via next. Backward: tail via prev. Format &quot;v &lt;-&gt; &quot; per node, then NULL.</p><pre><code>void displayforward(List *list) {
+    for(Node*c=list-&gt;head;c;c=c-&gt;next)printf(&quot;%d &lt;-&gt; &quot;,c-&gt;data);
+    printf(&quot;NULL&quot;);
+    puts(&quot;&quot;);
+}
+
+void displaybackward(List *list) {
+    for(Node*c=list-&gt;tail;c;c=c-&gt;prev)printf(&quot;%d &lt;-&gt; &quot;,c-&gt;data);
+    printf(&quot;NULL&quot;);
+    puts(&quot;&quot;);
+}</code></pre></details><details class=card open><summary>search</summary><p>Return the first node with data == val, or NULL.</p><pre><code>Node *search(List *list,int val) {
+    Node*c=list-&gt;head;
+    while(c&amp;&amp;c-&gt;data!=val)c=c-&gt;next;
+    return c;
+}</code></pre></details><details class=card open><summary>freelist</summary><p>Free every node (save next first), then head = tail = NULL.</p><pre><code>void freelist(List *list) {
+    Node*c=list-&gt;head;
+    while(c){
+        Node*t=c;
+        c=c-&gt;next;
+        free(t);
+    }
+    list-&gt;head=list-&gt;tail=NULL;
+}</code></pre></details><details class=card open><summary>insertmidd (after value)</summary><p>Insert val AFTER the first node holding data (4 links). If data is not found, append at the end.</p><pre><code>void insertmidd(List *list,int data,int val) {
+    Node*n=malloc(sizeof(Node));
+    n-&gt;data=val;
+    Node*p=list-&gt;head;
+    while(p&amp;&amp;p-&gt;data!=data)p=p-&gt;next;
+    if(!p){
+        n-&gt;next=NULL;
+        n-&gt;prev=list-&gt;tail;
+        if(list-&gt;tail)list-&gt;tail-&gt;next=n;
+        else list-&gt;head=n;
+        list-&gt;tail=n;
+        return;
+    }
+    n-&gt;prev=p;
+    n-&gt;next=p-&gt;next;
+    if(p-&gt;next)p-&gt;next-&gt;prev=n;
+    else list-&gt;tail=n;
+    p-&gt;next=n;
+}</code></pre></details><details class=card open><summary>deleteafter (after value)</summary><p>Find the node holding data and delete the node AFTER it: p-&gt;next = t-&gt;next, and t-&gt;next-&gt;prev = p (or tail = p if t was last).</p><pre><code>void deleteafter(List *list,int data) {
+    Node*p=list-&gt;head;
+    while(p&amp;&amp;p-&gt;data!=data)p=p-&gt;next;
+    if(!p||!p-&gt;next)return;
+    Node*t=p-&gt;next;
+    p-&gt;next=t-&gt;next;
+    if(t-&gt;next)t-&gt;next-&gt;prev=p;
+    else list-&gt;tail=p;
+    free(t);
+}</code></pre></details></section><section id=stack><h2>Stack</h2><div class=note>LIFO. top changes, so push/pop take StackNode **top. peek/isempty only read: single pointer. Never dereference NULL on an empty stack.</div><details class=card><summary>Given types</summary><pre><code>typedef struct StackNode{int val;struct StackNode*next;}StackNode;
+</code></pre></details><details class=card open><summary>push</summary><p>Push val on top. Double pointer, because top itself changes.</p><pre><code>void push(StackNode **top,int val) {
+    StackNode*n=malloc(sizeof(StackNode));
+    n-&gt;val=val;
+    n-&gt;next=*top;
+    *top=n;
+}</code></pre></details><details class=card open><summary>pop</summary><p>Remove the top node, free it, return its value.</p><pre><code>int pop(StackNode **top) {
+    StackNode*t=*top;
+    int v=t-&gt;val;
+    *top=t-&gt;next;
+    free(t);
+    return v;
+}</code></pre></details><details class=card open><summary>isempty + peek</summary><p>isempty: top == NULL. peek: value on top WITHOUT removing it (single pointer: nothing changes).</p><pre><code>int isempty(StackNode *top) {
+    return top==NULL;
+}
+
+int peek(StackNode *top) {
+    return top-&gt;val;
+}</code></pre></details><details class=card open><summary>displaystack + freestack</summary><p>display: print values from top down, space separated, then newline. free: free every node and set *top = NULL.</p><pre><code>void displaystack(StackNode *top) {
+    for(StackNode*c=top;c;c=c-&gt;next)printf(&quot;%d &quot;,c-&gt;val);
+    puts(&quot;&quot;);
+}
+
+void freestack(StackNode **top) {
+    while(*top){
+        StackNode*t=*top;
+        *top=t-&gt;next;
+        free(t);
+    }
+}</code></pre></details></section><section id=queue><h2>Queue</h2><div class=note>FIFO: enqueue at rear, dequeue from front. Empty queue: front = rear = new node. After the LAST dequeue set rear = NULL. No malloc inside dequeue.</div><details class=card><summary>Given types</summary><pre><code>typedef struct QueNode{int val;struct QueNode*next;}QueNode;
+typedef struct{QueNode*front,*rear;}Queue;
+</code></pre></details><details class=card open><summary>enqueue</summary><p>Add at the REAR. Empty queue: front = rear = new node.</p><pre><code>void enqueue(Queue *q,int val) {
+    QueNode*n=malloc(sizeof(QueNode));
+    n-&gt;val=val;
+    n-&gt;next=NULL;
+    if(q-&gt;rear)q-&gt;rear-&gt;next=n;
+    else q-&gt;front=n;
+    q-&gt;rear=n;
+}</code></pre></details><details class=card open><summary>dequeue</summary><p>Remove from the FRONT, return the value. If the queue becomes empty, rear must become NULL. Do not malloc here!</p><pre><code>int dequeue(Queue *q) {
+    QueNode*t=q-&gt;front;
+    int v=t-&gt;val;
+    q-&gt;front=t-&gt;next;
+    if(!q-&gt;front)q-&gt;rear=NULL;
+    free(t);
+    return v;
+}</code></pre></details><details class=card open><summary>isemptyque + peekque</summary><p>isemptyque: front == NULL. peekque: value at the front, without removing.</p><pre><code>int isemptyque(Queue *p) {
+    return p-&gt;front==NULL;
+}
+
+int peekque(Queue *p) {
+    return p-&gt;front-&gt;val;
+}</code></pre></details><details class=card open><summary>displayque + freequeue</summary><p>display: values from front to rear, space separated, then newline. free: free every node and set front = rear = NULL.</p><pre><code>void displayque(Queue *p) {
+    for(QueNode*c=p-&gt;front;c;c=c-&gt;next)printf(&quot;%d &quot;,c-&gt;val);
+    puts(&quot;&quot;);
+}
+
+void freequeue(Queue *p) {
+    QueNode*c=p-&gt;front;
+    while(c){
+        QueNode*t=c;
+        c=c-&gt;next;
+        free(t);
+    }
+    p-&gt;front=p-&gt;rear=NULL;
+}</code></pre></details></section><section id=astack><h2>Array stack</h2><div class=note>LIFO in an array. top = -1 means empty; full when top == MAX-1. push: ++top then store. pop: return then top--. Always check overflow/underflow first.</div><details class=card><summary>Given types</summary><pre><code>#define MAX 5
+int st[MAX];
+int top=-1;   // empty
+</code></pre></details><details class=card open><summary>push + pop + peek (array)</summary><p>top starts at -1. push: ++top THEN store; full -&gt; print &quot;Overflow &quot;. pop: return THEN top--; empty -&gt; print &quot;Underflow &quot; and return -1. peek: st[top] or -1.</p><pre><code>void push(int val) {
+    if(top==MAX-1){
+        printf(&quot;Overflow &quot;);
+        return;
+    }
+    st[++top]=val;
+}
+
+int pop(void) {
+    if(top==-1){
+        printf(&quot;Underflow &quot;);
+        return -1;
+    }
+    return st[top--];
+}
+
+int peek(void) {
+    return top==-1?-1:st[top];
+}</code></pre></details></section><section id=aqueue><h2>Array queue</h2><div class=note>Circular buffer: indices wrap with % MAX; count tells full (MAX) from empty (0). front moves on dequeue, rear moves on enqueue.</div><details class=card><summary>Given types</summary><pre><code>#define MAX 5
+int q[MAX];
+int front=0,rear=-1,count=0;
+</code></pre></details><details class=card open><summary>enqueue + dequeue (circular array)</summary><p>Circular: rear = (rear+1)%MAX, front = (front+1)%MAX, track count. Full -&gt; print &quot;Full &quot;. Empty -&gt; print &quot;Empty &quot; and return -1.</p><pre><code>void enqueue(int val) {
+    if(count==MAX){
+        printf(&quot;Full &quot;);
+        return;
+    }
+    rear=(rear+1)%MAX;
+    q[rear]=val;
+    count++;
+}
+
+int dequeue(void) {
+    if(count==0){
+        printf(&quot;Empty &quot;);
+        return -1;
+    }
+    int v=q[front];
+    front=(front+1)%MAX;
+    count--;
+    return v;
+}</code></pre></details></section><section id=chain><h2>Hash: chaining</h2><div class=note>Index = key % SIZE. Collision = same bucket list. Delete: compare with == (not =), relink prev/head, free, then STOP using the node. Average O(1), worst O(n).</div><details class=card><summary>Given types</summary><pre><code>#define SIZE 10
+typedef struct Node{int key,val;struct Node*next;}Node;
+Node*hastable[SIZE]={NULL};
+int has(int key){return key%SIZE;}
+</code></pre></details><details class=card open><summary>insertchaining</summary><p>Insert at the head of the bucket list hastable[has(key)].</p><pre><code>void insertchaining(int key,int val) {
+    int i=has(key);
+    Node*n=malloc(sizeof(Node));
+    n-&gt;key=key;
+    n-&gt;val=val;
+    n-&gt;next=hastable[i];
+    hastable[i]=n;
+}</code></pre></details><details class=card open><summary>deleteChaining</summary><p>Delete the node with this key from its bucket (head or middle), free it, then STOP. Not found: do nothing.</p><pre><code>void deleteChaining(int key) {
+    int i=has(key);
+    Node*c=hastable[i],*prev=NULL;
+    while(c&amp;&amp;c-&gt;key!=key){
+        prev=c;
+        c=c-&gt;next;
+    }
+    if(!c)return;
+    if(prev)prev-&gt;next=c-&gt;next;
+    else hastable[i]=c-&gt;next;
+    free(c);
+}</code></pre></details><details class=card open><summary>searchChaining</summary><p>Walk only the bucket hastable[has(key)]; return the node or NULL.</p><pre><code>Node *searchChaining(int key) {
+    Node*c=hastable[has(key)];
+    while(c&amp;&amp;c-&gt;key!=key)c=c-&gt;next;
+    return c;
+}</code></pre></details><details class=card open><summary>freetable</summary><p>Free every node of every bucket and set each bucket back to NULL.</p><pre><code>void freetable(void) {
+    for(int i=0;i&lt;SIZE;i++){
+        Node*c=hastable[i];
+        while(c){
+            Node*t=c;
+            c=c-&gt;next;
+            free(t);
+        }
+        hastable[i]=NULL;
+    }
+}</code></pre></details><details class=card open><summary>displaychaining</summary><p>For every bucket print &quot;[i]&quot; then &quot; key -&gt; val&quot; for each node in it, then a newline.</p><pre><code>void displaychaining(void) {
+    for(int i=0;i&lt;SIZE;i++){
+        printf(&quot;[%d]&quot;,i);
+        for(Node*c=hastable[i];c;c=c-&gt;next)printf(&quot; %d -&gt; %d&quot;,c-&gt;key,c-&gt;val);
+        puts(&quot;&quot;);
+    }
+}</code></pre></details></section><section id=probe><h2>Hash: probing</h2><div class=note>Probe (key+i)%SIZE. isocupied: 0 empty, 1 used, -1 deleted (tombstone). Search stops ONLY at 0 and skips -1. Delete marks -1, NEVER 0. Insert: update if key exists, else reuse the first tombstone seen.</div><details class=card><summary>Given types</summary><pre><code>#define SIZE 10
+typedef struct Hashentry{int val,key,isocupied;}Hashentry;   // isocupied: 0 empty, 1 used, -1 deleted
+Hashentry table[SIZE];
+int hash(int key,int i){return (key+i)%SIZE;}
+</code></pre></details><details class=card open><summary>insertprobing</summary><p>Linear probing: existing key -&gt; update value; else use the first deleted slot seen (or the empty one found); full -&gt; print &quot;Table is full&quot;.</p><pre><code>void insertprobing(int key,int value) {
+    int fd=-1,x=0;
+    for(int i=0;i&lt;SIZE;i++){
+        x=hash(key,i);
+        if(table[x].isocupied==1&amp;&amp;table[x].key==key){
+            table[x].val=value;
+            return;
+        }
+        if(table[x].isocupied==-1&amp;&amp;fd==-1)fd=x;
+        if(table[x].isocupied==0){
+            if(fd!=-1)x=fd;
+            table[x].key=key;
+            table[x].val=value;
+            table[x].isocupied=1;
+            return;
+        }
+    }
+    if(fd==-1){
+        printf(&quot;Table is full&quot;);
+        return;
+    }
+    table[fd].key=key;
+    table[fd].val=value;
+    table[fd].isocupied=1;
+}</code></pre></details><details class=card open><summary>deleteprobing</summary><p>Find the key (stop at an EMPTY slot), mark it DELETED (-1, never 0!). Return 1 if deleted, 0 if not found.</p><pre><code>int deleteprobing(int key) {
+    for(int i=0;i&lt;SIZE;i++){
+        int x=hash(key,i);
+        if(table[x].isocupied==0)return 0;
+        if(table[x].isocupied==1&amp;&amp;table[x].key==key){
+            table[x].isocupied=-1;
+            return 1;
+        }
+    }
+    return 0;
+}</code></pre></details><details class=card open><summary>searchprobing</summary><p>Probe: stop at an EMPTY slot (0) -&gt; NULL, SKIP deleted (-1), return &amp;table[x] if used and key matches. Max SIZE steps.</p><pre><code>Hashentry *searchprobing(int key) {
+    for(int i=0;i&lt;SIZE;i++){
+        int x=hash(key,i);
+        if(table[x].isocupied==0)return NULL;
+        if(table[x].isocupied==1&amp;&amp;table[x].key==key)return &amp;table[x];
+    }
+    return NULL;
+}</code></pre></details><details class=card open><summary>displayprob</summary><p>For each slot print &quot;[i] key -&gt; val&quot;, &quot;[i] deleted&quot; or &quot;[i] empty&quot; (one per line).</p><pre><code>void displayprob(void) {
+    for(int i=0;i&lt;SIZE;i++){
+        printf(&quot;[%d] &quot;,i);
+        if(table[i].isocupied==1)printf(&quot;%d -&gt; %d&quot;,table[i].key,table[i].val);
+        else if(table[i].isocupied==-1)printf(&quot;deleted&quot;);
+        else printf(&quot;empty&quot;);
+        puts(&quot;&quot;);
+    }
+}</code></pre></details></section><section id=sort><h2>Sorting</h2><div class=note>Bubble: inner loop to n-i-1, flag = early exit. Selection: swap the minimum into i. Insertion: start at i=1, shift right. Merge: temp arrays, &lt;= keeps it stable. Complexity: bubble/selection/insertion O(n^2) (bubble+insertion O(n) best case); merge O(n log n) always, O(n) extra memory.</div><details class=card><summary>Given types</summary><pre><code></code></pre></details><details class=card open><summary>bublesort</summary><p>Bubble sort with the early exit flag. Inner loop stops at n-i-1.</p><pre><code>void bublesort(int arr[],int n) {
+    for(int i=0;i&lt;n-1;i++){
+        int s=0;
+        for(int j=0;j&lt;n-i-1;j++){
+            if(arr[j]&gt;arr[j+1]){
+                int t=arr[j];
+                arr[j]=arr[j+1];
+                arr[j+1]=t;
+                s=1;
+            }
+        }
+        if(!s)return;
+    }
+}</code></pre></details><details class=card open><summary>selectionsort</summary><p>Find the minimum of the unsorted part, swap it to position i.</p><pre><code>void selectionsort(int arr[],int n) {
+    for(int i=0;i&lt;n-1;i++){
+        int m=i;
+        for(int j=i+1;j&lt;n;j++){
+            if(arr[j]&lt;arr[m])m=j;
+        }
+        int t=arr[m];
+        arr[m]=arr[i];
+        arr[i]=t;
+    }
+}</code></pre></details><details class=card open><summary>insertsort</summary><p>Take arr[i], shift bigger elements right, drop key in the gap.</p><pre><code>void insertsort(int arr[],int n) {
+    for(int i=1;i&lt;n;i++){
+        int key=arr[i],j=i-1;
+        while(j&gt;=0&amp;&amp;arr[j]&gt;key){
+            arr[j+1]=arr[j];
+            j--;
+        }
+        arr[j+1]=key;
+    }
+}</code></pre></details><details class=card open><summary>merge + mergeSort</summary><p>Write BOTH: merge copies the halves to temp arrays (malloc+free) and merges with &lt;= (stable); mergeSort splits at mid and recurses.</p><pre><code>void merge(int arr[],int left,int mid,int right) {
+    int n1=mid-left+1,n2=right-mid;
+    int*L=malloc(n1*sizeof(int)),*R=malloc(n2*sizeof(int));
+    for(int i=0;i&lt;n1;i++)L[i]=arr[left+i];
+    for(int j=0;j&lt;n2;j++)R[j]=arr[mid+1+j];
+    int i=0,j=0,k=left;
+    while(i&lt;n1&amp;&amp;j&lt;n2){
+        if(L[i]&lt;=R[j])arr[k++]=L[i++];
+        else arr[k++]=R[j++];
+    }
+    while(i&lt;n1)arr[k++]=L[i++];
+    while(j&lt;n2)arr[k++]=R[j++];
+    free(L);
+    free(R);
+}
+
+void mergeSort(int arr[],int left,int right) {
+    if(left&lt;right){
+        int mid=(left+right)/2;
+        mergeSort(arr,left,mid);
+        mergeSort(arr,mid+1,right);
+        merge(arr,left,mid,right);
+    }
+}</code></pre></details></section></main><script>
+document.querySelectorAll('pre code').forEach(c=>{const raw=c.textContent;let t=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+t=t.replace(/(\/\/.*)|\b(struct|typedef|return|if|else|while|for|NULL|sizeof)\b|\b(int|char|void|Node|List|Queue|QueNode|StackNode|Hashentry)\b|\b(malloc|free|printf|puts)\b|\b(\d+)\b/g,(m,c1,k,ty,b,n)=>c1?`<i class=c>${c1}</i>`:k?`<i class=k>${k}</i>`:ty?`<i class=t>${ty}</i>`:b?`<i class=b>${b}</i>`:`<i class=n>${n}</i>`);
+c.innerHTML=t;const x=document.createElement('button');x.textContent='copy';x.onclick=()=>{navigator.clipboard.writeText(raw);x.textContent='✓';setTimeout(()=>x.textContent='copy',1200)};c.parentNode.appendChild(x)});
+function flt(){const v=f.value.toLowerCase();document.querySelectorAll('details.card').forEach(d=>d.hidden=!d.textContent.toLowerCase().includes(v));document.querySelectorAll('section').forEach(s=>s.hidden=!s.querySelector('details.card:not([hidden])'))}
+let op=1;function tg(){op=!op;document.querySelectorAll('details.card').forEach(d=>d.open=op)}
+</script></body></html>
